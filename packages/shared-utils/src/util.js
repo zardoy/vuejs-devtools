@@ -596,22 +596,8 @@ export function focusInput (el) {
 }
 
 export function openInEditor (file) {
-  // Console display
   const fileName = file.replace(/\\/g, '\\\\')
-  const src = `fetch('${SharedData.openInEditorHost}__open-in-editor?file=${encodeURI(file)}').then(response => {
-    if (response.ok) {
-      console.log('File ${fileName} opened in editor')
-    } else {
-      const msg = 'Opening component ${fileName} failed'
-      const target = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {}
-      if (target.__VUE_DEVTOOLS_TOAST__) {
-        target.__VUE_DEVTOOLS_TOAST__(msg, 'error')
-      } else {
-        console.log('%c' + msg, 'color:red')
-      }
-      console.log('Check the setup of your project, see https://github.com/vuejs/vue-devtools/blob/master/docs/open-in-editor.md')
-    }
-  })`
+  const src = `window.open('vscode://zardoy.vue-devtools-adapter/open-vue?file=${encodeURI(file)}')`
   if (isChrome) {
     chrome.devtools.inspectedWindow.eval(src)
   } else {

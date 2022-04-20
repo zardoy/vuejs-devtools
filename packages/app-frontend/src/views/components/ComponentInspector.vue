@@ -71,6 +71,7 @@ import ActionHeader from '@front/components/ActionHeader.vue'
 import StateInspector from '@front/components/StateInspector.vue'
 import { searchDeepInObject, sortByKey, openInEditor, getComponentDisplayName } from '@utils/util'
 import groupBy from 'lodash/groupBy'
+import { isChrome } from '../../../../shared-utils/src/env'
 
 export default {
   components: {
@@ -120,6 +121,13 @@ export default {
     }
   },
 
+  mounted () {
+    window.addEventListener('keydown', this.keydownHandler)
+  },
+  beforeDestroy () {
+    window.removeEventListener('keydown', this.keydownHandler)
+  },
+
   methods: {
     inspectDOM () {
       if (!this.hasTarget) return
@@ -135,6 +143,22 @@ export default {
     openInEditor () {
       const file = this.target.file
       openInEditor(file)
+    },
+    copyFilePath () {
+      const file = this.target.file
+      const src = `copy('${file}')`
+      if (isChrome) {
+        chrome.devtools.inspectedWindow.eval(src)
+      } else {
+        // eslint-disable-next-line no-eval
+        eval(src)
+      }
+    },
+    keydownHandler ({ code }) {
+      if (document.activeElement && ['input', 'textarea', 'select'].includes(document.activeElement.tagName.toLowerCase())) return
+      if (code === 'KeyW') this.openInEditor()
+      if (code === 'KeyE') this.copyFilePath()
+      if (code === 'KeyD') this.inspectDOM()
     }
   }
 }
